@@ -102,6 +102,12 @@ check_environment() {
 
 # Install dependencies
 install_dependencies() {
+    # Check if git is already installed
+    if command -v git >/dev/null 2>&1; then
+        log "Git is already installed, skipping dependency installation"
+        return 0
+    fi
+    
     log "Installing dependencies..."
     
     # Update package list
@@ -115,6 +121,14 @@ install_dependencies() {
 
 # Install Ansible
 install_ansible() {
+    # Check if Ansible is already installed
+    if command -v ansible-playbook >/dev/null 2>&1; then
+        log "Ansible is already installed, skipping installation"
+        ansible_version=$(ansible --version | head -1)
+        log "Found: $ansible_version"
+        return 0
+    fi
+    
     log "Installing Ansible..."
     
     # Try to install Ansible via pip first
@@ -192,7 +206,7 @@ main() {
     cleanup
     
     log "Setup completed successfully!"
-    log "You can now connect to your Android device via SSH"
+    log "You can now connect to your Android device via SSH on port 2222"
 }
 
 # Handle cleanup on exit
