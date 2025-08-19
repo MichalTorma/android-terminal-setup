@@ -4,6 +4,29 @@
 
 set -e
 
+# Parse command line arguments
+SKIP_ENV_CHECK=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --skip-env-check)
+            SKIP_ENV_CHECK=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo "Options:"
+            echo "  --skip-env-check    Skip Android environment detection"
+            echo "  --help, -h         Show this help message"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -47,12 +70,35 @@ check_environment() {
         exit 1
     fi
     
-    if ! grep -q "android" /proc/version 2>/dev/null; then
+    # More comprehensive Android detection
+    local is_android=false
+    
+    # Check multiple indicators of Android environment
+    if grep -q "android" /proc/version 2>/dev/null; then
+        is_android=true
+    elif [ -d "/system" ] && [ -f "/system/build.prop" ]; then
+        is_android=true
+    elif [ -n "$ANDROID_DATA" ] || [ -n "$ANDROID_ROOT" ]; then
+        is_android=true
+    elif [ -f "/proc/cpuinfo" ] && grep -q "android" /proc/cpuinfo 2>/dev/null; then
+        is_android=true
+    fi
+    
+    # If we're in a container, also check for Android-specific paths
+    if [ "$is_android" = false ] && [ -f "/proc/1/cgroup" ]; then
+        if grep -q "android" /proc/1/cgroup 2>/dev/null; then
+            is_android=true
+        fi
+    fi
+    
+    if [ "$is_android" = false ]; then
         warning "This script is designed for Android containers. Continue anyway? (y/N)"
         read -r response
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
             exit 1
         fi
+    else
+        log "Android environment detected"
     fi
 }
 
