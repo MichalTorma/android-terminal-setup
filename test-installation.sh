@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test script for debian-android-ssh installation
+# Test script for android-terminal-setup installation
 # Run this after installation to verify everything works
 
 set -euo pipefail
@@ -31,7 +31,7 @@ run_test() {
     fi
 }
 
-echo "🧪 debian-android-ssh Installation Test Suite"
+echo "🧪 android-terminal-setup Installation Test Suite"
 echo "=============================================="
 echo
 

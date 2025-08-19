@@ -1,15 +1,17 @@
-# debian-android-ssh
+# android-terminal-setup
 
-🚀 **One-liner installer for OpenSSH server** inside the new **Android 16 Debian terminal/container** (Pixel 9 and similar). No systemd required; starts `sshd` directly with enterprise-grade security and reliability.
+🚀 **Ansible-based SSH server setup** for **Android 16 Debian terminal/container** (Pixel 9 and similar). Enterprise-grade configuration management with declarative playbooks, idempotent operations, and comprehensive security hardening.
 
 ## ✨ Features
 
 - 🔒 **Secure by default** - Random password generation, proper file permissions
-- 🛡️ **Production-ready** - Comprehensive error handling and logging
+- 🛡️ **Production-ready** - Declarative configuration management with Ansible
 - 📱 **Android optimized** - Designed specifically for Android Debian containers
 - 🔧 **Flexible deployment** - Works with or without systemd
 - 📊 **Smart detection** - Auto-detects device IP and existing installations
-- 🎯 **Zero dependencies** - Only requires `curl` and `bash`
+- 🎯 **Idempotent operations** - Safe to run multiple times
+- 🔄 **Version controlled** - All configurations managed through templates
+- 🧪 **Testable** - Easy to test and validate configurations
 
 ## 🚀 Quick Start
 
@@ -17,18 +19,31 @@
 
 ```bash
 apt-get update -y && apt-get install -y curl
-bash <(curl -s https://raw.githubusercontent.com/<your-github-username>/debian-android-ssh/main/install-ssh.sh)
+bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh)
 ```
 
 ### Manual installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-github-username>/debian-android-ssh.git
-cd debian-android-ssh
+git clone https://github.com/MichalTorma/android-terminal-setup.git
+cd android-terminal-setup
 
-# Run installer
-sudo bash install-ssh.sh
+# Run Ansible installer
+sudo bash install-ansible.sh
+```
+
+### Advanced: Direct Ansible usage
+
+```bash
+# Install Ansible manually
+apt-get update -y && apt-get install -y python3 python3-pip
+pip3 install ansible
+
+# Clone and run playbook
+git clone https://github.com/MichalTorma/android-terminal-setup.git
+cd android-terminal-setup
+ansible-playbook -i inventory.ini ansible-playbook.yml -v
 ```
 
 ## 📋 Requirements
@@ -36,16 +51,19 @@ sudo bash install-ssh.sh
 - Android 16+ with Debian terminal/container
 - Root access (sudo)
 - Internet connection for package installation
-- `curl` and `bash` (installed automatically if missing)
+- Python 3.6+ (installed automatically)
+- Ansible 2.9+ (installed automatically)
 
 ## 🔧 What gets installed
 
 - **OpenSSH server** - Latest version from Debian repositories
-- **Secure configuration** - Hardened SSH settings for Android environment
+- **Ansible** - Configuration management tool for reliable deployments
+- **Secure configuration** - Hardened SSH settings via templated configuration
 - **Random password** - 12-character secure password generated automatically
 - **Startup script** - `/usr/local/bin/start-ssh.sh` for easy management
 - **Systemd service** - Optional service file if systemd is available
 - **Logging** - Comprehensive logging to `/var/log/ssh.log`
+- **Templates** - Version-controlled configuration templates
 
 ## 🔐 Security Features
 
@@ -179,10 +197,17 @@ sudo apt-get update
 sudo apt-get upgrade openssh-server
 ```
 
-### Reinstalling
+### Reconfiguring with Ansible
 ```bash
-# The installer will detect existing installation and offer to reconfigure
-bash <(curl -s https://raw.githubusercontent.com/<your-github-username>/debian-android-ssh/main/install-ssh.sh)
+# Ansible playbooks are idempotent - safe to run multiple times
+ansible-playbook -i inventory.ini ansible-playbook.yml -v
+```
+
+### Updating the entire setup
+```bash
+# Pull latest changes and reapply
+git pull origin main
+ansible-playbook -i inventory.ini ansible-playbook.yml -v
 ```
 
 ## 📄 License

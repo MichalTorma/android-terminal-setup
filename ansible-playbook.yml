@@ -1,0 +1,140 @@
+---
+- name: Setup OpenSSH Server for Android Debian Container
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+  
+  vars:
+    ssh_port: 22
+    ssh_config_file: /etc/ssh/sshd_config
+    ssh_backup_file: /etc/ssh/sshd_config.backup
+    ssh_log_file: /var/log/ssh.log
+    ssh_startup_script: /usr/local/bin/start-ssh.sh
+    systemd_service_file: /etc/systemd/system/android-ssh.service
+    
+  pre_tasks:
+    - name: Check if running on Android Debian container
+      fail:
+        msg: "This playbook is designed for Android Debian containers only"
+      when: ansible_distribution != "Debian" or "android" not in ansible_system.lower()
+      
+    - name: Ensure required packages are installed
+      apt:
+        name:
+          - openssh-server
+          - curl
+          - net-tools
+        state: present
+        update_cache: yes
+      
+  tasks:
+    - name: Backup existing SSH configuration
+      copy:
+        src: "{{ ssh_config_file }}"
+        dest: "{{ ssh_backup_file }}"
+        remote_src: yes
+        backup: yes
+      ignore_errors: yes
+      
+    - name: Generate random password for root user
+      set_fact:
+        root_password: "{{ lookup('password', '/dev/null length=12 chars=ascii_letters,digits') }}"
+        
+    - name: Set root password
+      user:
+        name: root
+        password: "{{ root_password | password_hash('sha512') }}"
+        
+    - name: Create hardened SSH configuration
+      template:
+        src: sshd_config.j2
+        dest: "{{ ssh_config_file }}"
+        owner: root
+        group: root
+        mode: '0600'
+        backup: yes
+      notify: restart ssh
+        
+    - name: Create SSH startup script
+      template:
+        src: start-ssh.sh.j2
+        dest: "{{ ssh_startup_script }}"
+        owner: root
+        group: root
+        mode: '0755'
+        
+    - name: Create systemd service file (if systemd is available)
+      template:
+        src: android-ssh.service.j2
+        dest: "{{ systemd_service_file }}"
+        owner: root
+        group: root
+        mode: '0644'
+      when: ansible_service_mgr == "systemd"
+      notify: reload systemd
+      
+    - name: Create SSH log file
+      file:
+        path: "{{ ssh_log_file }}"
+        state: touch
+        owner: root
+        group: root
+        mode: '0644'
+        
+    - name: Ensure SSH directories have correct permissions
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop:
+        - /etc/ssh
+        - /var/run/sshd
+        - /usr/local/bin
+        
+    - name: Test SSH configuration
+      command: sshd -t
+      register: ssh_config_test
+      failed_when: ssh_config_test.rc != 0
+      
+    - name: Get device IP address
+      set_fact:
+        device_ip: "{{ ansible_default_ipv4.address }}"
+        
+    - name: Display installation summary
+      debug:
+        msg: |
+          ========================================
+          SSH Server Setup Complete!
+          ========================================
+          
+          📱 Device IP: {{ device_ip }}
+          🔑 Root Password: {{ root_password }}
+          🚪 SSH Port: {{ ssh_port }}
+          
+          🚀 To start SSH server:
+          - Interactive: {{ ssh_startup_script }}
+          - Background: nohup {{ ssh_startup_script }} > {{ ssh_log_file }} 2>&1 &
+          - Systemd: systemctl start android-ssh (if available)
+          
+          🔗 Connect from another device:
+          ssh root@{{ device_ip }}
+          
+          📋 Logs: {{ ssh_log_file }}
+          ⚙️  Config: {{ ssh_config_file }}
+          
+          ⚠️  IMPORTANT: Change the root password after first login!
+          ========================================
+          
+  handlers:
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
+      ignore_errors: yes
+        
+    - name: reload systemd
+      systemd:
+        daemon_reload: yes
+      when: ansible_service_mgr == "systemd"

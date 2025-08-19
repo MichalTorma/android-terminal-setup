@@ -1,6 +1,6 @@
-# Contributing to debian-android-ssh
+# Contributing to android-terminal-setup
 
-Thank you for your interest in contributing to debian-android-ssh! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to android-terminal-setup! This document provides guidelines and information for contributors.
 
 ## 🤝 How to Contribute
 
@@ -39,9 +39,10 @@ We welcome feature requests! Please:
 
 #### Coding Standards
 
-- **Bash scripts**: Follow [Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
-- **Comments**: Use clear, descriptive comments
-- **Error handling**: Always include proper error handling
+- **Ansible playbooks**: Follow [Ansible Best Practices](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html)
+- **YAML**: Use consistent indentation and clear structure
+- **Templates**: Use descriptive variable names and comments
+- **Error handling**: Always include proper error handling and validation
 - **Security**: Consider security implications of all changes
 - **Testing**: Test on actual Android devices when possible
 
@@ -52,6 +53,8 @@ We welcome feature requests! Please:
 - Verify **SSH connectivity** from external devices
 - Check **log files** for errors
 - Test **error conditions** (network issues, permission problems)
+- Test **Ansible playbook idempotency** (run multiple times safely)
+- Validate **template configurations** and variable substitution
 
 ### Documentation
 
@@ -67,22 +70,32 @@ We welcome improvements to:
 ### Project Structure
 
 ```
-debian-android-ssh/
-├── install-ssh.sh      # Main installer script
-├── README.md           # Project documentation
-├── LICENSE             # MIT License
-├── CHANGELOG.md        # Version history
-├── CONTRIBUTING.md     # This file
-└── .gitignore          # Git ignore rules
+android-terminal-setup/
+├── ansible-playbook.yml    # Main Ansible playbook
+├── install-ansible.sh      # Ansible installer script
+├── inventory.ini           # Ansible inventory
+├── requirements.txt        # Python dependencies
+├── templates/              # Configuration templates
+│   ├── sshd_config.j2      # SSH configuration template
+│   ├── start-ssh.sh.j2     # SSH startup script template
+│   └── android-ssh.service.j2 # Systemd service template
+├── README.md               # Project documentation
+├── LICENSE                 # MIT License
+├── CHANGELOG.md            # Version history
+├── CONTRIBUTING.md         # This file
+└── .gitignore              # Git ignore rules
 ```
 
 ### Key Components
 
-- **install-ssh.sh**: Main installer with comprehensive error handling
+- **ansible-playbook.yml**: Main Ansible playbook with comprehensive configuration management
+- **install-ansible.sh**: Ansible installer script with dependency management
+- **templates/**: Version-controlled configuration templates
 - **README.md**: User-facing documentation
-- **Security features**: Hardened SSH configuration
+- **Security features**: Hardened SSH configuration via templates
 - **Logging**: Comprehensive logging system
 - **IP detection**: Multiple methods for device IP detection
+- **Idempotent operations**: Safe to run multiple times
 
 ### Security Considerations
 
@@ -145,8 +158,10 @@ We're particularly interested in contributions for:
 - **Enhanced security features**
 - **Better error handling and recovery**
 - **Improved documentation**
-- **Testing and validation tools**
+- **Testing and validation tools** (Molecule, etc.)
 - **Performance optimizations**
+- **Additional Ansible roles and playbooks**
+- **Template improvements and customization options**
 
 ## 📄 License
 
@@ -154,4 +169,4 @@ By contributing to this project, you agree that your contributions will be licen
 
 ---
 
-Thank you for contributing to debian-android-ssh! 🚀
+Thank you for contributing to android-terminal-setup! 🚀
