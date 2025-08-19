@@ -93,6 +93,16 @@ ansible-playbook -i inventory.ini ansible-playbook.yml -v
 
 ## 📱 Usage
 
+### Port Forwarding Setup
+
+Since Android containers often require port forwarding to be accessible from outside, SSH is configured to run on port **2222** by default. This makes it easier to set up port forwarding with 4-digit ports.
+
+**Common port forwarding scenarios:**
+- **ADB port forwarding**: `adb forward tcp:2222 tcp:2222`
+- **Termux port forwarding**: Use Termux's port forwarding feature
+- **Android Studio**: Configure port forwarding in the emulator settings
+- **Physical device**: Use apps like "Port Forwarding" or similar
+
 ### Start SSH server
 
 ```bash
@@ -110,14 +120,14 @@ sudo systemctl enable android-ssh
 ### Connect from another device
 
 ```bash
-# Basic connection
-ssh root@<android-ip>
-
-# With specific port (if changed)
-ssh root@<android-ip> -p 22
+# Basic connection (port 2222)
+ssh root@<android-ip> -p 2222
 
 # With verbose output for debugging
-ssh -v root@<android-ip>
+ssh -v root@<android-ip> -p 2222
+
+# If you've forwarded a different port, use that instead
+ssh root@<host-ip> -p <forwarded-port>
 ```
 
 ### Check status
@@ -186,8 +196,11 @@ ps aux | grep sshd
 # Check SSH logs
 tail -f /var/log/ssh.log
 
-# Verify port is listening
-netstat -tlnp | grep :22
+# Verify port is listening (should be 2222)
+netstat -tlnp | grep :2222
+
+# Check if port forwarding is set up correctly
+adb forward --list  # If using ADB
 ```
 
 **Permission denied**
@@ -205,6 +218,22 @@ sudo chown root:root /etc/ssh/sshd_config
 # Manual IP detection
 ip addr show
 ip route get 8.8.8.8
+```
+
+**Port forwarding issues**
+```bash
+# Verify SSH is listening on the correct port
+netstat -tlnp | grep :2222
+
+# Test local connection first
+ssh root@localhost -p 2222
+
+# Check if port forwarding is working
+telnet localhost 2222  # Should connect if SSH is running
+
+# For ADB port forwarding
+adb forward tcp:2222 tcp:2222
+adb forward --list  # Verify the forward is active
 ```
 
 ### Logs and Debugging

@@ -5,7 +5,7 @@
   gather_facts: yes
   
   vars:
-    ssh_port: 22
+    ssh_port: 2222
     ssh_config_file: /etc/ssh/sshd_config
     ssh_backup_file: /etc/ssh/sshd_config.backup
     ssh_log_file: /var/log/ssh.log
@@ -119,7 +119,7 @@
           - Systemd: systemctl start android-ssh (if available)
           
           🔗 Connect from another device:
-          ssh root@{{ device_ip }}
+          ssh root@{{ device_ip }} -p {{ ssh_port }}
           
           📋 Logs: {{ ssh_log_file }}
           ⚙️  Config: {{ ssh_config_file }}
