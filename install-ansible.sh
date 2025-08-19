@@ -106,15 +106,22 @@ check_environment() {
     fi
 }
 
-# Install Ansible
-install_ansible() {
-    log "Installing Ansible..."
+# Install dependencies
+install_dependencies() {
+    log "Installing dependencies..."
     
     # Update package list
     apt-get update -y
     
-    # Install required packages
-    apt-get install -y python3 python3-pip python3-apt software-properties-common python3-full
+    # Install required packages including git
+    apt-get install -y python3 python3-pip python3-apt software-properties-common python3-full git
+    
+    success "Dependencies installed successfully"
+}
+
+# Install Ansible
+install_ansible() {
+    log "Installing Ansible..."
     
     # Try to install Ansible via pip first
     if pip3 install --break-system-packages ansible 2>/dev/null; then
@@ -185,6 +192,7 @@ main() {
     
     check_root
     check_environment
+    install_dependencies
     install_ansible
     run_playbook
     cleanup

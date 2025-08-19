@@ -66,11 +66,13 @@ ansible-playbook -i inventory.ini ansible-playbook.yml -v
 - Internet connection for package installation
 - Python 3.6+ (installed automatically)
 - Ansible 2.9+ (installed automatically)
+- Git (installed automatically)
 
 ## 🔧 What gets installed
 
 - **OpenSSH server** - Latest version from Debian repositories
 - **Ansible** - Configuration management tool for reliable deployments
+- **Git** - Version control for repository cloning
 - **Secure configuration** - Hardened SSH settings via templated configuration
 - **Random password** - 12-character secure password generated automatically
 - **Startup script** - `/usr/local/bin/start-ssh.sh` for easy management
