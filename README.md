@@ -1,119 +1,73 @@
 # android-terminal-setup
 
-🚀 **Ansible-based SSH server setup** for **Android 16 Terminal** - the native Debian container environment in Android 16+. Enterprise-grade configuration management with declarative playbooks, idempotent operations, and comprehensive security hardening.
+🚀 **Ansible-based SSH server setup** for **Android 16 Terminal** - the native Debian container environment in Android 16+.
 
 > **Note**: This is specifically designed for the **Android Terminal** feature in Android 16+, which provides a native Debian container environment. This is NOT for Termux, UserLAnd, or other third-party terminal solutions.
 
 ## ✨ Features
 
-- 🔒 **Secure by default** - Random password generation, proper file permissions
+- 🔒 **Secure by default** - Random password generation, hardened SSH configuration
 - 🛡️ **Production-ready** - Declarative configuration management with Ansible
-- 📱 **Android optimized** - Designed specifically for Android Debian containers
+- 📱 **Android optimized** - Designed specifically for Android Terminal
 - 🔧 **Flexible deployment** - Works with or without systemd
-- 📊 **Smart detection** - Auto-detects device IP and existing installations
 - 🎯 **Idempotent operations** - Safe to run multiple times
-- 🔄 **Version controlled** - All configurations managed through templates
-- 🧪 **Testable** - Easy to test and validate configurations
+- ⚡ **Smart caching** - Skips installation if Ansible is already available
 
 ## 🚀 Quick Start
 
-### One-liner installation (in Android Terminal)
+### One-liner installation
 
 ```bash
 apt-get update -y && apt-get install -y curl
 bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh)
 ```
 
-**Note**: If you get environment detection warnings, you can skip them:
-```bash
-bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh) --skip-env-check
-```
-
 ### Manual installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/MichalTorma/android-terminal-setup.git
 cd android-terminal-setup
-
-# Run Ansible installer
 sudo bash install-ansible.sh
-
-# Or skip environment check if needed
-sudo bash install-ansible.sh --skip-env-check
-```
-
-### Advanced: Direct Ansible usage
-
-```bash
-# Install Ansible manually (handles externally managed environments)
-apt-get update -y && apt-get install -y python3 python3-pip python3-full
-
-# Try pip with break-system-packages flag
-pip3 install --break-system-packages ansible
-
-# Or use apt (alternative method)
-apt-get install -y ansible
-
-# Clone and run playbook
-git clone https://github.com/MichalTorma/android-terminal-setup.git
-cd android-terminal-setup
-ansible-playbook -i inventory.ini ansible-playbook.yml -v
 ```
 
 ## 📋 Requirements
 
 - **Android 16+** with **Android Terminal** feature enabled
-- **Android Terminal** provides a native Debian container environment
 - Root access (sudo) within the Android Terminal
 - Internet connection for package installation
-- Python 3.6+ (installed automatically)
-- Ansible 2.9+ (installed automatically)
-- Git (installed automatically)
 
 > **What is Android Terminal?**
 > 
-> Android Terminal is a native feature in Android 16+ that provides a full Debian container environment directly on your Android device. It's not a third-party app like Termux - it's built into the Android system and provides a genuine Linux environment with full package management capabilities.
+> Android Terminal is a native feature in Android 16+ that provides a full Debian container environment directly on your Android device. It's built into the Android system and provides a genuine Linux environment with full package management capabilities.
 
 ## 🔧 What gets installed
 
-- **OpenSSH server** - Latest version from Debian repositories
-- **Ansible** - Configuration management tool for reliable deployments
-- **Git** - Version control for repository cloning
-- **Secure configuration** - Hardened SSH settings via templated configuration
-- **Random password** - 12-character secure password generated automatically
-- **Startup script** - `/usr/local/bin/start-ssh.sh` for easy management
-- **Systemd service** - Optional service file if systemd is available
-- **Logging** - Comprehensive logging to `/var/log/ssh.log`
-- **Templates** - Version-controlled configuration templates
-
-## 🔐 Security Features
-
-- ✅ Random password generation (12 characters)
-- ✅ Secure file permissions (600 for config, 755 for directories)
-- ✅ Hardened SSH configuration
-- ✅ Backup of existing configurations
-- ✅ No empty passwords allowed
-- ✅ Limited authentication attempts (3 max)
-- ✅ Session limits (10 max sessions)
-- ✅ Client keepalive settings
+- **OpenSSH server** on port 2222
+- **Ansible** (configuration management)
+- **Secure configuration** with hardened SSH settings
+- **Random password** (12 characters) generated automatically
+- **Startup script** for easy management
+- **Systemd service** (if available)
+- **Comprehensive logging**
 
 ## 📱 Usage
 
-### Port Forwarding Setup
+### Port Forwarding
 
-Since Android Terminal runs in a containerized environment, port forwarding is required to access SSH from outside the Android device. SSH is configured to run on port **2222** by default for easier port forwarding setup.
+SSH runs on port **2222** by default. Set up port forwarding to access from outside:
 
-**Port forwarding methods for Android Terminal:**
-- **ADB port forwarding** (recommended): `adb forward tcp:2222 tcp:2222`
-- **Android Studio**: Configure port forwarding in the emulator settings
-- **Physical device**: Use ADB over USB or wireless debugging
-- **Development tools**: Most Android development tools support port forwarding to the Android Terminal container
+```bash
+# ADB port forwarding (recommended)
+adb forward tcp:2222 tcp:2222
+
+# Connect from your computer
+ssh root@localhost -p 2222
+```
 
 ### Start SSH server
 
 ```bash
-# Interactive mode (foreground)
+# Interactive mode
 /usr/local/bin/start-ssh.sh
 
 # Background mode
@@ -127,14 +81,11 @@ sudo systemctl enable android-ssh
 ### Connect from another device
 
 ```bash
-# Basic connection (port 2222)
+# Basic connection
 ssh root@<android-ip> -p 2222
 
-# With verbose output for debugging
+# With verbose output
 ssh -v root@<android-ip> -p 2222
-
-# If you've forwarded a different port, use that instead
-ssh root@<host-ip> -p <forwarded-port>
 ```
 
 ### Check status
@@ -146,25 +97,19 @@ ps aux | grep sshd
 # View SSH logs
 tail -f /var/log/ssh.log
 
-# Check SSH service status (if using systemd)
+# Check service status (if using systemd)
 sudo systemctl status android-ssh
 ```
 
 ## 🔧 Configuration
 
-### SSH Configuration File
-- **Location**: `/etc/ssh/sshd_config`
-- **Backup**: Automatically backed up before modification
-- **Permissions**: 600 (root:root)
-
 ### Key Files
+- **SSH config**: `/etc/ssh/sshd_config`
 - **Startup script**: `/usr/local/bin/start-ssh.sh`
 - **Log file**: `/var/log/ssh.log`
-- **Systemd service**: `/etc/systemd/system/android-ssh.service` (if available)
+- **Systemd service**: `/etc/systemd/system/android-ssh.service`
 
 ### Customization
-
-After installation, you can customize the SSH configuration:
 
 ```bash
 # Edit SSH config
@@ -179,29 +124,6 @@ sudo pkill sshd
 
 ### Common Issues
 
-**System compatibility check**
-```bash
-# The installer checks for Debian-based systems (including Android Terminal).
-# If you encounter issues, the system information will be displayed for debugging.
-# The playbook works on any Debian-based system, not just Android Terminal.
-```
-
-**"externally-managed-environment" error during Ansible installation**
-```bash
-# This error occurs on newer Debian systems. The installer handles this automatically,
-# but if you're installing manually, use one of these methods:
-
-# Method 1: Use the --break-system-packages flag
-pip3 install --break-system-packages ansible
-
-# Method 2: Install via apt (recommended)
-apt-get install -y ansible
-
-# Method 3: Use virtual environment
-python3 -m venv /tmp/ansible-venv
-/tmp/ansible-venv/bin/pip install ansible
-```
-
 **SSH connection refused**
 ```bash
 # Check if SSH is running
@@ -210,90 +132,39 @@ ps aux | grep sshd
 # Check SSH logs
 tail -f /var/log/ssh.log
 
-# Verify port is listening (should be 2222)
+# Verify port is listening
 netstat -tlnp | grep :2222
-
-# Check if port forwarding is set up correctly
-adb forward --list  # If using ADB
-```
-
-**Permission denied**
-```bash
-# Check SSH config permissions
-ls -la /etc/ssh/sshd_config
-
-# Fix permissions if needed
-sudo chmod 600 /etc/ssh/sshd_config
-sudo chown root:root /etc/ssh/sshd_config
-```
-
-**Can't find device IP**
-```bash
-# Manual IP detection
-ip addr show
-ip route get 8.8.8.8
 ```
 
 **Port forwarding issues**
 ```bash
-# Verify SSH is listening on the correct port
-netstat -tlnp | grep :2222
-
-# Test local connection first (within Android Terminal)
+# Test local connection first
 ssh root@localhost -p 2222
 
-# Check if port forwarding is working
-telnet localhost 2222  # Should connect if SSH is running
-
-# For ADB port forwarding (from your computer)
-adb forward tcp:2222 tcp:2222
-adb forward --list  # Verify the forward is active
-
-# Connect from your computer after port forwarding
-ssh root@localhost -p 2222
+# Check ADB port forwarding
+adb forward --list
 ```
 
-### Logs and Debugging
-
+**"externally-managed-environment" error**
 ```bash
-# View SSH server logs
-tail -f /var/log/ssh.log
-
-# Test SSH configuration
-sudo sshd -t
-
-# Verbose SSH server startup
-sudo sshd -D -e -d
+# The installer handles this automatically, but if installing manually:
+pip3 install --break-system-packages ansible
+# or
+apt-get install -y ansible
 ```
 
 ## 🔄 Updates and Maintenance
 
-### Updating SSH server
-```bash
-sudo apt-get update
-sudo apt-get upgrade openssh-server
-```
-
 ### Reconfiguring with Ansible
 ```bash
-# Ansible playbooks are idempotent - safe to run multiple times
+# Safe to run multiple times (idempotent)
 ansible-playbook -i inventory.ini ansible-playbook.yml -v
 ```
 
-### Updating the entire setup
+### Updating SSH server
 ```bash
-# Pull latest changes and reapply
-git pull origin main
-ansible-playbook -i inventory.ini ansible-playbook.yml -v
+sudo apt-get update && sudo apt-get upgrade openssh-server
 ```
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## ⚠️ Security Notice
 
@@ -304,11 +175,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📞 Support
 
-If you encounter any issues:
-
+If you encounter issues:
 1. Check the [troubleshooting section](#troubleshooting)
-2. Review the SSH logs: `tail -f /var/log/ssh.log`
+2. Review SSH logs: `tail -f /var/log/ssh.log`
 3. Open an issue on GitHub with detailed information
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
