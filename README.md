@@ -1,6 +1,8 @@
 # android-terminal-setup
 
-🚀 **Ansible-based SSH server setup** for **Android 16 Debian terminal/container** (Pixel 9 and similar). Enterprise-grade configuration management with declarative playbooks, idempotent operations, and comprehensive security hardening.
+🚀 **Ansible-based SSH server setup** for **Android 16 Terminal** - the native Debian container environment in Android 16+. Enterprise-grade configuration management with declarative playbooks, idempotent operations, and comprehensive security hardening.
+
+> **Note**: This is specifically designed for the **Android Terminal** feature in Android 16+, which provides a native Debian container environment. This is NOT for Termux, UserLAnd, or other third-party terminal solutions.
 
 ## ✨ Features
 
@@ -15,7 +17,7 @@
 
 ## 🚀 Quick Start
 
-### One-liner installation (on Android Debian terminal)
+### One-liner installation (in Android Terminal)
 
 ```bash
 apt-get update -y && apt-get install -y curl
@@ -61,12 +63,17 @@ ansible-playbook -i inventory.ini ansible-playbook.yml -v
 
 ## 📋 Requirements
 
-- Android 16+ with Debian terminal/container
-- Root access (sudo)
+- **Android 16+** with **Android Terminal** feature enabled
+- **Android Terminal** provides a native Debian container environment
+- Root access (sudo) within the Android Terminal
 - Internet connection for package installation
 - Python 3.6+ (installed automatically)
 - Ansible 2.9+ (installed automatically)
 - Git (installed automatically)
+
+> **What is Android Terminal?**
+> 
+> Android Terminal is a native feature in Android 16+ that provides a full Debian container environment directly on your Android device. It's not a third-party app like Termux - it's built into the Android system and provides a genuine Linux environment with full package management capabilities.
 
 ## 🔧 What gets installed
 
@@ -95,13 +102,13 @@ ansible-playbook -i inventory.ini ansible-playbook.yml -v
 
 ### Port Forwarding Setup
 
-Since Android containers often require port forwarding to be accessible from outside, SSH is configured to run on port **2222** by default. This makes it easier to set up port forwarding with 4-digit ports.
+Since Android Terminal runs in a containerized environment, port forwarding is required to access SSH from outside the Android device. SSH is configured to run on port **2222** by default for easier port forwarding setup.
 
-**Common port forwarding scenarios:**
-- **ADB port forwarding**: `adb forward tcp:2222 tcp:2222`
-- **Termux port forwarding**: Use Termux's port forwarding feature
+**Port forwarding methods for Android Terminal:**
+- **ADB port forwarding** (recommended): `adb forward tcp:2222 tcp:2222`
 - **Android Studio**: Configure port forwarding in the emulator settings
-- **Physical device**: Use apps like "Port Forwarding" or similar
+- **Physical device**: Use ADB over USB or wireless debugging
+- **Development tools**: Most Android development tools support port forwarding to the Android Terminal container
 
 ### Start SSH server
 
@@ -172,6 +179,13 @@ sudo pkill sshd
 
 ### Common Issues
 
+**"This script is designed for Android containers" warning**
+```bash
+# This warning appears if the script can't detect the Android Terminal environment.
+# You can safely continue or use the --skip-env-check flag:
+bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh) --skip-env-check
+```
+
 **"externally-managed-environment" error during Ansible installation**
 ```bash
 # This error occurs on newer Debian systems. The installer handles this automatically,
@@ -225,15 +239,18 @@ ip route get 8.8.8.8
 # Verify SSH is listening on the correct port
 netstat -tlnp | grep :2222
 
-# Test local connection first
+# Test local connection first (within Android Terminal)
 ssh root@localhost -p 2222
 
 # Check if port forwarding is working
 telnet localhost 2222  # Should connect if SSH is running
 
-# For ADB port forwarding
+# For ADB port forwarding (from your computer)
 adb forward tcp:2222 tcp:2222
 adb forward --list  # Verify the forward is active
+
+# Connect from your computer after port forwarding
+ssh root@localhost -p 2222
 ```
 
 ### Logs and Debugging

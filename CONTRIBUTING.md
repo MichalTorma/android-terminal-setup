@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to android-terminal-setup! This document provides guidelines and information for contributors.
 
+> **Note**: This project is specifically designed for the **Android Terminal** feature in Android 16+, which provides a native Debian container environment. This is NOT for Termux, UserLAnd, or other third-party terminal solutions.
+
 ## 🤝 How to Contribute
 
 ### Reporting Issues
@@ -48,13 +50,14 @@ We welcome feature requests! Please:
 
 #### Testing Guidelines
 
-- Test on **Android 16+** with Debian terminal
+- Test on **Android 16+** with **Android Terminal** feature enabled
 - Test both **with and without systemd**
-- Verify **SSH connectivity** from external devices
+- Verify **SSH connectivity** from external devices via port forwarding
 - Check **log files** for errors
 - Test **error conditions** (network issues, permission problems)
 - Test **Ansible playbook idempotency** (run multiple times safely)
 - Validate **template configurations** and variable substitution
+- Test **port forwarding** scenarios (ADB, Android Studio, etc.)
 
 ### Documentation
 
@@ -154,7 +157,8 @@ cat /etc/ssh/sshd_config
 
 We're particularly interested in contributions for:
 
-- **Additional Android device support**
+- **Enhanced Android Terminal integration**
+- **Improved port forwarding automation**
 - **Enhanced security features**
 - **Better error handling and recovery**
 - **Improved documentation**
@@ -162,6 +166,7 @@ We're particularly interested in contributions for:
 - **Performance optimizations**
 - **Additional Ansible roles and playbooks**
 - **Template improvements and customization options**
+- **Android Terminal-specific optimizations**
 
 ## 📄 License
 
