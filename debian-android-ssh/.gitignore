@@ -1,0 +1,47 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# SSH keys (for testing)
+test_ssh_keys/
+*.key
+*.pub
+
+# Test artifacts
+test_output/
+coverage/
+
+# Documentation builds
+docs/_build/
+site/
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+
+# Backup files created by the installer
+sshd_config.backup.*
