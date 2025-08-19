@@ -36,9 +36,14 @@ sudo bash install-ansible.sh
 ### Advanced: Direct Ansible usage
 
 ```bash
-# Install Ansible manually
-apt-get update -y && apt-get install -y python3 python3-pip
-pip3 install ansible
+# Install Ansible manually (handles externally managed environments)
+apt-get update -y && apt-get install -y python3 python3-pip python3-full
+
+# Try pip with break-system-packages flag
+pip3 install --break-system-packages ansible
+
+# Or use apt (alternative method)
+apt-get install -y ansible
 
 # Clone and run playbook
 git clone https://github.com/MichalTorma/android-terminal-setup.git
@@ -146,6 +151,22 @@ sudo pkill sshd
 ## 🛠️ Troubleshooting
 
 ### Common Issues
+
+**"externally-managed-environment" error during Ansible installation**
+```bash
+# This error occurs on newer Debian systems. The installer handles this automatically,
+# but if you're installing manually, use one of these methods:
+
+# Method 1: Use the --break-system-packages flag
+pip3 install --break-system-packages ansible
+
+# Method 2: Install via apt (recommended)
+apt-get install -y ansible
+
+# Method 3: Use virtual environment
+python3 -m venv /tmp/ansible-venv
+/tmp/ansible-venv/bin/pip install ansible
+```
 
 **SSH connection refused**
 ```bash

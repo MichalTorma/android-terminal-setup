@@ -64,10 +64,31 @@ install_ansible() {
     apt-get update -y
     
     # Install required packages
-    apt-get install -y python3 python3-pip python3-apt software-properties-common
+    apt-get install -y python3 python3-pip python3-apt software-properties-common python3-full
     
-    # Install Ansible
-    pip3 install ansible
+    # Try to install Ansible via pip first
+    if pip3 install --break-system-packages ansible 2>/dev/null; then
+        success "Ansible installed via pip"
+    else
+        log "Pip installation failed, trying apt..."
+        
+        # Try to install via apt
+        if apt-get install -y ansible; then
+            success "Ansible installed via apt"
+        else
+            log "Apt installation failed, trying alternative method..."
+            
+            # Create virtual environment as fallback
+            python3 -m venv /tmp/ansible-venv
+            /tmp/ansible-venv/bin/pip install ansible
+            
+            # Create symlink to make ansible available system-wide
+            ln -sf /tmp/ansible-venv/bin/ansible /usr/local/bin/ansible
+            ln -sf /tmp/ansible-venv/bin/ansible-playbook /usr/local/bin/ansible-playbook
+            
+            success "Ansible installed via virtual environment"
+        fi
+    fi
     
     # Verify installation
     if ! ansible --version > /dev/null 2>&1; then
