@@ -92,10 +92,14 @@ check_environment() {
     fi
     
     if [ "$is_android" = false ]; then
-        warning "This script is designed for Android containers. Continue anyway? (y/N)"
-        read -r response
-        if [[ ! "$response" =~ ^[Yy]$ ]]; then
-            exit 1
+        if [ "$SKIP_ENV_CHECK" = true ]; then
+            log "Skipping environment check as requested"
+        else
+            warning "This script is designed for Android containers. Continue anyway? (y/N)"
+            read -r response
+            if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                exit 1
+            fi
         fi
     else
         log "Android environment detected"

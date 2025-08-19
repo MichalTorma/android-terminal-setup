@@ -22,6 +22,11 @@ apt-get update -y && apt-get install -y curl
 bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh)
 ```
 
+**Note**: If you get environment detection warnings, you can skip them:
+```bash
+bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh) --skip-env-check
+```
+
 ### Manual installation
 
 ```bash
@@ -31,6 +36,9 @@ cd android-terminal-setup
 
 # Run Ansible installer
 sudo bash install-ansible.sh
+
+# Or skip environment check if needed
+sudo bash install-ansible.sh --skip-env-check
 ```
 
 ### Advanced: Direct Ansible usage
