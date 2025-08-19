@@ -179,11 +179,11 @@ sudo pkill sshd
 
 ### Common Issues
 
-**"This script is designed for Android containers" warning**
+**System compatibility check**
 ```bash
-# This warning appears if the script can't detect the Android Terminal environment.
-# You can safely continue or use the --skip-env-check flag:
-bash <(curl -s https://raw.githubusercontent.com/MichalTorma/android-terminal-setup/main/install-ansible.sh) --skip-env-check
+# The installer checks for Debian-based systems (including Android Terminal).
+# If you encounter issues, the system information will be displayed for debugging.
+# The playbook works on any Debian-based system, not just Android Terminal.
 ```
 
 **"externally-managed-environment" error during Ansible installation**

@@ -13,10 +13,23 @@
     systemd_service_file: /etc/systemd/system/android-ssh.service
     
   pre_tasks:
-    - name: Check if running on Android Debian container
+    - name: Display system information
+      debug:
+        msg: |
+          ========================================
+          System Information
+          ========================================
+          System: {{ ansible_system }}
+          Distribution: {{ ansible_distribution }}
+          Version: {{ ansible_distribution_version }}
+          Architecture: {{ ansible_architecture }}
+          Kernel: {{ ansible_kernel }}
+          ========================================
+      
+    - name: Check if running on Debian-based system
       fail:
-        msg: "This playbook is designed for Android Debian containers only"
-      when: ansible_distribution != "Debian" or "android" not in ansible_system.lower()
+        msg: "This playbook is designed for Debian-based systems only (including Android Terminal)"
+      when: ansible_distribution not in ["Debian", "Ubuntu"]
       
     - name: Ensure required packages are installed
       apt:

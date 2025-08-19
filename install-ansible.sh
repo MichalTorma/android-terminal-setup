@@ -63,14 +63,16 @@ check_root() {
     fi
 }
 
-# Check if running on Android Debian
+# Check if running on Debian-based system
 check_environment() {
     if [ ! -f /etc/debian_version ]; then
         error "This script is designed for Debian-based systems only"
         exit 1
     fi
     
-    # More comprehensive Android detection
+    log "Debian-based system detected"
+    
+    # Optional Android detection (for informational purposes only)
     local is_android=false
     
     # Check multiple indicators of Android environment
@@ -91,18 +93,10 @@ check_environment() {
         fi
     fi
     
-    if [ "$is_android" = false ]; then
-        if [ "$SKIP_ENV_CHECK" = true ]; then
-            log "Skipping environment check as requested"
-        else
-            warning "This script is designed for Android containers. Continue anyway? (y/N)"
-            read -r response
-            if [[ ! "$response" =~ ^[Yy]$ ]]; then
-                exit 1
-            fi
-        fi
-    else
+    if [ "$is_android" = true ]; then
         log "Android environment detected"
+    else
+        log "Standard Debian environment detected"
     fi
 }
 
