@@ -1,6 +1,6 @@
 # android-terminal-setup
 
-🚀 **Ansible-based SSH server setup** for **Android 16 Terminal** - the native Debian container environment in Android 16+.
+🚀 **Complete development environment setup** for **Android 16 Terminal** - SSH server, Kubernetes (Minikube), and ArgoCD in the native Debian container environment.
 
 > **Note**: This is specifically designed for the **Android Terminal** feature in Android 16+, which provides a native Debian container environment. This is NOT for Termux, UserLAnd, or other third-party terminal solutions.
 
@@ -12,6 +12,9 @@
 - 🔧 **Flexible deployment** - Works with or without systemd
 - 🎯 **Idempotent operations** - Safe to run multiple times
 - ⚡ **Smart caching** - Skips installation if Ansible is already available
+- 🐳 **Docker support** - Full Docker installation and configuration
+- ☸️ **Kubernetes ready** - Minikube cluster with essential addons
+- 🚀 **ArgoCD included** - GitOps deployment platform ready to use
 
 ## 🚀 Quick Start
 
@@ -44,6 +47,10 @@ sudo bash install-ansible.sh
 
 - **OpenSSH server** on port 2222
 - **Ansible** (configuration management)
+- **Docker** (container runtime)
+- **Kubectl** (Kubernetes CLI)
+- **Minikube** (local Kubernetes cluster)
+- **ArgoCD** (GitOps deployment platform)
 - **Secure configuration** with hardened SSH settings
 - **Random password** (12 characters) generated automatically
 - **Startup script** for easy management
@@ -104,6 +111,38 @@ tail -f /var/log/ssh.log
 # Check service status (if using systemd)
 sudo systemctl status android-ssh
 ```
+
+## ☸️ Kubernetes & ArgoCD Usage
+
+### Kubernetes Commands
+
+```bash
+# Check cluster status
+kubectl cluster-info
+
+# View all pods
+kubectl get pods --all-namespaces
+
+# Access Minikube dashboard
+minikube dashboard
+
+# Check Minikube status
+minikube status
+```
+
+### ArgoCD Access
+
+```bash
+# Port forward ArgoCD server
+kubectl port-forward -n argocd svc/argocd-server 8080:443
+
+# Get ArgoCD admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+**ArgoCD Web UI**: https://localhost:8080
+- **Username**: admin
+- **Password**: (generated during installation)
 
 ## 🔧 Configuration
 

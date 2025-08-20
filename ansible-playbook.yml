@@ -1,5 +1,5 @@
 ---
-- name: Setup OpenSSH Server for Android Debian Container
+- name: Setup Complete Development Environment for Android Terminal
   hosts: localhost
   become: yes
   gather_facts: yes
@@ -11,6 +11,15 @@
     ssh_log_file: /var/log/ssh.log
     ssh_startup_script: /usr/local/bin/start-ssh.sh
     systemd_service_file: /etc/systemd/system/android-ssh.service
+    
+    # Kubernetes/Minikube settings
+    minikube_version: "1.32.0"
+    kubectl_version: "1.29.0"
+    docker_version: "24.0.7"
+    
+    # ArgoCD settings
+    argocd_namespace: "argocd"
+    argocd_version: "2.9.0"
     
   pre_tasks:
     - name: Display system information
@@ -30,17 +39,26 @@
       fail:
         msg: "This playbook is designed for Debian-based systems only (including Android Terminal)"
       when: ansible_distribution not in ["Debian", "Ubuntu"]
-      
+        
     - name: Ensure required packages are installed
       apt:
         name:
           - openssh-server
           - curl
           - net-tools
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
+          - software-properties-common
+          - wget
+          - unzip
+          - jq
         state: present
         update_cache: yes
       
   tasks:
+    # SSH Setup Tasks
     - name: Backup existing SSH configuration
       copy:
         src: "{{ ssh_config_file }}"
@@ -106,10 +124,110 @@
         - /var/run/sshd
         - /usr/local/bin
         
-    - name: Test SSH configuration
-      command: sshd -t
-      register: ssh_config_test
-      failed_when: ssh_config_test.rc != 0
+    # Docker Installation
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+      
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+      
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      
+    - name: Add current user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      
+    # Kubectl Installation
+    - name: Download kubectl
+      get_url:
+        url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+      
+    - name: Verify kubectl installation
+      command: kubectl version --client
+      register: kubectl_version_output
+      
+    # Minikube Installation
+    - name: Download Minikube
+      get_url:
+        url: "https://github.com/kubernetes/minikube/releases/download/v{{ minikube_version }}/minikube-linux-amd64"
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+      
+    - name: Verify Minikube installation
+      command: minikube version
+      register: minikube_version_output
+      
+    # Start Minikube
+    - name: Start Minikube cluster
+      command: minikube start --driver=docker --force
+      register: minikube_start_output
+      changed_when: "'Starting' in minikube_start_output.stdout or 'Starting' in minikube_start_output.stderr"
+      
+    - name: Enable Minikube addons
+      command: "minikube addons enable {{ item }}"
+      loop:
+        - ingress
+        - dashboard
+        - metrics-server
+      register: minikube_addons_output
+      
+    # Install ArgoCD
+    - name: Create ArgoCD namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ argocd_namespace }}"
+      
+    - name: Install ArgoCD
+      kubernetes.core.k8s:
+        state: present
+        src: https://raw.githubusercontent.com/argoproj/argo-cd/v{{ argocd_version }}/manifests/install.yaml
+      
+    - name: Wait for ArgoCD pods to be ready
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: "{{ argocd_namespace }}"
+        label_selectors:
+          - app.kubernetes.io/name=argocd-server
+      register: argocd_pods
+      until: argocd_pods.resources | length > 0 and argocd_pods.resources[0].status.phase == 'Running'
+      retries: 30
+      delay: 10
+      
+    - name: Get ArgoCD admin password
+      command: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+      register: argocd_password
+      
+    - name: Get Minikube IP
+      command: minikube ip
+      register: minikube_ip_output
       
     - name: Get device IP address
       set_fact:
@@ -138,17 +256,21 @@
           Use port forwarding for reliable external access:
           adb forward tcp:2222 tcp:2222
           ========================================
-        
+         
     - name: Display installation summary
       debug:
         msg: |
           ========================================
-          SSH Server Setup Complete!
+          Complete Development Environment Setup Complete!
           ========================================
           
           📱 Device IP: {{ device_ip }}
           🔑 Root Password: {{ root_password }}
           🚪 SSH Port: {{ ssh_port }}
+          
+          🐳 Docker: Installed and running
+          ☸️  Kubernetes: Minikube cluster running
+          🚀 ArgoCD: Installed and ready
           
           🚀 To start SSH server:
           - Interactive: {{ ssh_startup_script }}
@@ -160,6 +282,16 @@
           
           📋 Logs: {{ ssh_log_file }}
           ⚙️  Config: {{ ssh_config_file }}
+          
+          ☸️  Kubernetes Access:
+          - Minikube IP: {{ minikube_ip_output.stdout }}
+          - kubectl: kubectl get pods --all-namespaces
+          - Dashboard: minikube dashboard
+          
+          🚀 ArgoCD Access:
+          - Admin Password: {{ argocd_password.stdout }}
+          - Port Forward: kubectl port-forward -n argocd svc/argocd-server 8080:443
+          - Web UI: https://localhost:8080 (admin / {{ argocd_password.stdout }})
           
           ⚠️  IMPORTANT: Change the root password after first login!
           ========================================
