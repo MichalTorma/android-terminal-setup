@@ -154,6 +154,10 @@ ip addr show
 # Verify container vs host networking
 # Container IP (internal): Usually 10.x.x.x (like 10.135.204.118)
 # Host IP (external): Usually 192.168.x.x (WiFi/hotspot)
+
+# If direct connection times out, use port forwarding:
+adb forward tcp:2222 tcp:2222
+ssh root@localhost -p 2222
 ```
 
 **"externally-managed-environment" error**
@@ -162,6 +166,19 @@ ip addr show
 pip3 install --break-system-packages ansible
 # or
 apt-get install -y ansible
+```
+
+**Direct connection timeout**
+```bash
+# If ssh root@10.135.204.118 -p 2222 times out:
+# This is normal - the virtual network is isolated
+
+# Solution: Use port forwarding instead
+adb forward tcp:2222 tcp:2222
+ssh root@localhost -p 2222
+
+# Alternative: Check if SSH is running locally first
+ssh root@localhost -p 2222  # Should work from within Android Terminal
 ```
 
 ## 🔄 Updates and Maintenance
