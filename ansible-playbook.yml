@@ -115,6 +115,30 @@
       set_fact:
         device_ip: "{{ ansible_default_ipv4.address }}"
         
+    - name: Display network information
+      debug:
+        msg: |
+          ========================================
+          Network Information
+          ========================================
+          Primary Interface: {{ ansible_default_ipv4.interface }}
+          Container IP: {{ ansible_default_ipv4.address }}
+          Container Network: {{ ansible_default_ipv4.network }}
+          
+          All Network Interfaces:
+          {% for interface in ansible_interfaces %}
+          {% if hostvars[inventory_hostname]['ansible_' + interface.replace('-', '_')] is defined %}
+          {% if hostvars[inventory_hostname]['ansible_' + interface.replace('-', '_')]['ipv4'] is defined %}
+          - {{ interface }}: {{ hostvars[inventory_hostname]['ansible_' + interface.replace('-', '_')]['ipv4']['address'] }}
+          {% endif %}
+          {% endif %}
+          {% endfor %}
+          
+          Note: Your Android Terminal uses a virtual network interface (like enp0s8).
+          Use port forwarding for reliable external access:
+          adb forward tcp:2222 tcp:2222
+          ========================================
+        
     - name: Display installation summary
       debug:
         msg: |

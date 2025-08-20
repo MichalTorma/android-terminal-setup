@@ -64,6 +64,10 @@ adb forward tcp:2222 tcp:2222
 ssh root@localhost -p 2222
 ```
 
+> **Why port forwarding?**
+> 
+> Android Terminal runs in a virtualized environment with its own network interface (e.g., enp0s8 with IP 10.135.204.118). While this interface may be accessible from the Android host, port forwarding ensures reliable external access and handles any network isolation between the virtual environment and your Android device's network interfaces.
+
 ### Start SSH server
 
 ```bash
@@ -143,6 +147,13 @@ ssh root@localhost -p 2222
 
 # Check ADB port forwarding
 adb forward --list
+
+# Check network interfaces
+ip addr show
+
+# Verify container vs host networking
+# Container IP (internal): Usually 10.x.x.x (like 10.135.204.118)
+# Host IP (external): Usually 192.168.x.x (WiFi/hotspot)
 ```
 
 **"externally-managed-environment" error**
