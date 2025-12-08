@@ -79,8 +79,8 @@ run_test "Root password set" "grep -q '^root:' /etc/shadow"
 # Test 13: Check if SSH can start (dry run)
 run_test "SSH server can start" "timeout 5s sshd -T >/dev/null 2>&1 || true"
 
-# Test 14: Check Docker status
-run_test "Docker service running" "systemctl is-active docker || service docker status"
+# Test 14: Check Podman status
+run_test "Podman running" "podman info >/dev/null 2>&1"
 
 # Test 15: Check Minikube status
 run_test "Minikube running" "minikube status | grep -q 'Running'"

@@ -15,7 +15,6 @@
     # Kubernetes/Minikube settings
     minikube_version: "1.32.0"
     kubectl_version: "1.29.0"
-    docker_version: "24.0.7"
     
     # ArgoCD settings
     argocd_namespace: "argocd"
@@ -132,40 +131,15 @@
         group: root
         mode: '0755'
         
-    # Docker Installation
-    - name: Add Docker GPG key
-      apt_key:
-        url: https://download.docker.com/linux/debian/gpg
-        state: present
-      
-    - name: Add Docker repository
-      apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
-        state: present
-        filename: docker
-      
-    - name: Install Docker
+    # Podman Installation
+    - name: Install Podman
       apt:
         name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
+          - podman
+          - buildah
+          - skopeo
         state: present
         update_cache: yes
-      
-    - name: Start and enable Docker service
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
-      
-    - name: Add current user to docker group
-      user:
-        name: "{{ ansible_user }}"
-        groups: docker
-        append: yes
       
     # Sway / GUI Installation
     - name: Install Sway and GUI tools
@@ -249,7 +223,7 @@
       
     # Start Minikube
     - name: Start Minikube cluster
-      command: minikube start --driver=docker --force
+      command: minikube start --driver=podman --container-runtime=cri-o
       register: minikube_start_output
       changed_when: "'Starting' in minikube_start_output.stdout or 'Starting' in minikube_start_output.stderr"
       
@@ -334,7 +308,7 @@
           🔑 Root Password: {{ root_password }}
           🚪 SSH Port: {{ ssh_port }}
           
-          🐳 Docker: Installed and running
+          🐳 Podman: Installed
           ☸️  Kubernetes: Minikube cluster running
           🚀 ArgoCD: Installed and ready
           
