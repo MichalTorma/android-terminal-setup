@@ -124,6 +124,14 @@
         - /var/run/sshd
         - /usr/local/bin
         
+    - name: Install update-android-env command
+      copy:
+        src: "{{ playbook_dir }}/install-ansible.sh"
+        dest: /usr/local/bin/update-android-env
+        owner: root
+        group: root
+        mode: '0755'
+        
     # Docker Installation
     - name: Add Docker GPG key
       apt_key:

@@ -91,6 +91,9 @@ run_test "ArgoCD namespace exists" "kubectl get ns argocd"
 # Test 17: Check ArgoCD server pod
 run_test "ArgoCD server pod running" "kubectl -n argocd get pods -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].status.phase}' | grep -q 'Running'"
 
+# Test 18: Check update command
+run_test "Update command installed" "test -x /usr/local/bin/update-android-env"
+
 echo
 echo "📊 Test Results:"
 echo "================="
