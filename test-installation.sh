@@ -94,6 +94,15 @@ run_test "ArgoCD server pod running" "kubectl -n argocd get pods -l app.kubernet
 # Test 18: Check update command
 run_test "Update command installed" "test -x /usr/local/bin/update-android-env"
 
+# Test 19: Check Sway installation
+run_test "Sway installed" "command -v sway"
+
+# Test 20: Check Waybar installation
+run_test "Waybar installed" "command -v waybar"
+
+# Test 21: Check Kanshi installation
+run_test "Kanshi installed" "command -v kanshi"
+
 echo
 echo "📊 Test Results:"
 echo "================="

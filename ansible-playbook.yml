@@ -167,6 +167,64 @@
         groups: docker
         append: yes
       
+    # Sway / GUI Installation
+    - name: Install Sway and GUI tools
+      apt:
+        name:
+          - sway
+          - swaybg
+          - swayidle
+          - swaylock
+          - waybar
+          - foot
+          - wofi
+          - kanshi
+          - grim
+          - slurp
+          - wl-clipboard
+          - squeekboard
+          - xwayland
+          - fonts-font-awesome
+        state: present
+        update_cache: yes
+
+    - name: Ensure Sway configuration directory exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+      loop:
+        - "/home/{{ ansible_user }}/.config/sway"
+        - "/home/{{ ansible_user }}/.config/waybar"
+        - "/home/{{ ansible_user }}/.config/kanshi"
+        - "/home/{{ ansible_user }}/.config/foot"
+
+    - name: Deploy Sway configuration
+      template:
+        src: sway/config.j2
+        dest: "/home/{{ ansible_user }}/.config/sway/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Deploy Waybar configuration
+      template:
+        src: waybar/config.j2
+        dest: "/home/{{ ansible_user }}/.config/waybar/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Deploy Kanshi configuration
+      template:
+        src: sway/kanshi.config.j2
+        dest: "/home/{{ ansible_user }}/.config/kanshi/config"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+      
     # Kubectl Installation
     - name: Download kubectl
       get_url:
