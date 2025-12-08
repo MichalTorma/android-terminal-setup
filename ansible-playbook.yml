@@ -16,6 +16,9 @@
     minikube_version: "1.32.0"
     kubectl_version: "1.29.0"
     
+    # User settings
+    ansible_user: "{{ ansible_user_id }}"
+
     # ArgoCD settings
     argocd_namespace: "argocd"
     argocd_version: "2.9.0"
