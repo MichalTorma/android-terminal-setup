@@ -169,6 +169,12 @@
         state: present
         update_cache: yes
 
+    - name: Ensure seat group exists
+      group:
+        name: seat
+        state: present
+        system: yes
+
     - name: Add user to hardware groups
       user:
         name: "{{ setup_user }}"
