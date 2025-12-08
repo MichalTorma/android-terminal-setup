@@ -201,7 +201,7 @@
       copy:
         dest: /etc/profile.d/00-environment.sh
         content: |
-          # XDG Runtime Dir
+          # XDG Runtime Dir - Critical for Wayland
           if [ -z "$XDG_RUNTIME_DIR" ] && [ -n "$USER" ]; then
             export XDG_RUNTIME_DIR="/run/user/$(id -u)"
             if [ ! -d "$XDG_RUNTIME_DIR" ]; then
@@ -211,15 +211,22 @@
             fi
           fi
           
-          # DBus Session
+          # DBus Session - Critical for IPC (Waybar/Sway interactions)
           if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-             if command -v dbus-launch >/dev/null; then
+             # Try using existing session if available
+             if [ -e "$XDG_RUNTIME_DIR/bus" ]; then
+                export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+             elif command -v dbus-launch >/dev/null; then
+                # Fallback to launching a new session
                 eval $(dbus-launch --sh-syntax --exit-with-session)
              fi
           fi
           
-          # Sway Compatibility
-          export WLR_NO_HARDWARE_CURSORS=1
+          # Sway/Wayland Compatibility for Android Containers
+          export WLR_RENDERER=pixman          # Force software rendering (fixes black screen/gl errors)
+          export WLR_NO_HARDWARE_CURSORS=1    # Fix invisible cursor
+          export XDG_CURRENT_DESKTOP=sway     # Help apps know where they are
+          export XDG_SESSION_TYPE=wayland
           export MOZ_ENABLE_WAYLAND=1
           export QT_QPA_PLATFORM=wayland
         mode: '0755'
