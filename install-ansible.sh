@@ -161,7 +161,22 @@ install_ansible() {
         exit 1
     fi
     
-    success "Ansible installed successfully"
+    # Install Python dependencies
+    if [ -f "requirements.txt" ]; then
+        log "Installing Python dependencies..."
+        if pip3 install --break-system-packages -r requirements.txt 2>/dev/null; then
+            success "Python dependencies installed via pip"
+        else
+            log "Pip installation failed, trying with --user..."
+             pip3 install --user -r requirements.txt
+        fi
+    else
+        # Fallback if requirements.txt is not found (e.g. running from curl)
+        log "requirements.txt not found, installing default dependencies..."
+        pip3 install --break-system-packages kubernetes>=28.1.0
+    fi
+
+    success "Ansible and dependencies installed successfully"
 }
 
 # Clone repository and run playbook
