@@ -17,7 +17,9 @@
     kubectl_version: "1.29.0"
     
     # User settings
-    ansible_user: "{{ ansible_user_id }}"
+    # User settings
+    setup_user: "{{ ansible_env.USER | default('root') }}"
+    setup_user_home: "{{ ansible_env.HOME | default('/root') }}"
 
     # ArgoCD settings
     argocd_namespace: "argocd"
@@ -169,37 +171,37 @@
       file:
         path: "{{ item }}"
         state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        owner: "{{ setup_user }}"
+        group: "{{ setup_user }}"
         mode: '0755'
       loop:
-        - "/home/{{ ansible_user }}/.config/sway"
-        - "/home/{{ ansible_user }}/.config/waybar"
-        - "/home/{{ ansible_user }}/.config/kanshi"
-        - "/home/{{ ansible_user }}/.config/foot"
+        - "{{ setup_user_home }}/.config/sway"
+        - "{{ setup_user_home }}/.config/waybar"
+        - "{{ setup_user_home }}/.config/kanshi"
+        - "{{ setup_user_home }}/.config/foot"
 
     - name: Deploy Sway configuration
       template:
         src: sway/config.j2
-        dest: "/home/{{ ansible_user }}/.config/sway/config"
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        dest: "{{ setup_user_home }}/.config/sway/config"
+        owner: "{{ setup_user }}"
+        group: "{{ setup_user }}"
         mode: '0644'
 
     - name: Deploy Waybar configuration
       template:
         src: waybar/config.j2
-        dest: "/home/{{ ansible_user }}/.config/waybar/config"
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        dest: "{{ setup_user_home }}/.config/waybar/config"
+        owner: "{{ setup_user }}"
+        group: "{{ setup_user }}"
         mode: '0644'
 
     - name: Deploy Kanshi configuration
       template:
         src: sway/kanshi.config.j2
-        dest: "/home/{{ ansible_user }}/.config/kanshi/config"
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        dest: "{{ setup_user_home }}/.config/kanshi/config"
+        owner: "{{ setup_user }}"
+        group: "{{ setup_user }}"
         mode: '0644'
       
     # Kubectl Installation
