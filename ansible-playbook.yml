@@ -166,6 +166,7 @@
           - xwayland
           - fonts-font-awesome
           - seatd
+          - dbus-x11
         state: present
         update_cache: yes
 
@@ -189,10 +190,18 @@
       when: ansible_service_mgr == "systemd"
       ignore_errors: yes
 
-    - name: Configure XDG_RUNTIME_DIR setup script
+    - name: Enable dbus service
+      service:
+        name: dbus
+        state: started
+        enabled: yes
+      ignore_errors: yes
+
+    - name: Configure Environment setup script (XDG + DBus)
       copy:
-        dest: /etc/profile.d/00-xdg-runtime-dir.sh
+        dest: /etc/profile.d/00-environment.sh
         content: |
+          # XDG Runtime Dir
           if [ -z "$XDG_RUNTIME_DIR" ] && [ -n "$USER" ]; then
             export XDG_RUNTIME_DIR="/run/user/$(id -u)"
             if [ ! -d "$XDG_RUNTIME_DIR" ]; then
@@ -201,6 +210,18 @@
               chown "$USER:$USER" "$XDG_RUNTIME_DIR"
             fi
           fi
+          
+          # DBus Session
+          if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+             if command -v dbus-launch >/dev/null; then
+                eval $(dbus-launch --sh-syntax --exit-with-session)
+             fi
+          fi
+          
+          # Sway Compatibility
+          export WLR_NO_HARDWARE_CURSORS=1
+          export MOZ_ENABLE_WAYLAND=1
+          export QT_QPA_PLATFORM=wayland
         mode: '0755'
 
     - name: Ensure Sway configuration directory exists
