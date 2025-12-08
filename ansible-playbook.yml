@@ -41,6 +41,7 @@
           Distribution: {{ ansible_distribution }}
           Version: {{ ansible_distribution_version }}
           Architecture: {{ ansible_architecture }}
+          Mapped Arch: {{ arch_map[ansible_architecture] | default('amd64') }}
           Kernel: {{ ansible_kernel }}
           ========================================
       
@@ -215,6 +216,7 @@
         url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/{{ arch_map[ansible_architecture] | default('amd64') }}/kubectl"
         dest: /usr/local/bin/kubectl
         mode: '0755'
+        force: yes
       
     - name: Verify kubectl installation
       command: kubectl version --client
@@ -226,6 +228,7 @@
         url: "https://github.com/kubernetes/minikube/releases/download/v{{ minikube_version }}/minikube-linux-{{ arch_map[ansible_architecture] | default('amd64') }}"
         dest: /usr/local/bin/minikube
         mode: '0755'
+        force: yes
       
     - name: Verify Minikube installation
       command: minikube version
