@@ -165,8 +165,37 @@
           - squeekboard
           - xwayland
           - fonts-font-awesome
+          - seatd
         state: present
         update_cache: yes
+
+    - name: Add user to hardware groups
+      user:
+        name: "{{ setup_user }}"
+        groups: video,input,tty,render,seat
+        append: yes
+        
+    - name: Enable seatd service (if systemd)
+      systemd:
+        name: seatd
+        state: started
+        enabled: yes
+      when: ansible_service_mgr == "systemd"
+      ignore_errors: yes
+
+    - name: Configure XDG_RUNTIME_DIR setup script
+      copy:
+        dest: /etc/profile.d/00-xdg-runtime-dir.sh
+        content: |
+          if [ -z "$XDG_RUNTIME_DIR" ] && [ -n "$USER" ]; then
+            export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+            if [ ! -d "$XDG_RUNTIME_DIR" ]; then
+              mkdir -p "$XDG_RUNTIME_DIR"
+              chmod 700 "$XDG_RUNTIME_DIR"
+              chown "$USER:$USER" "$XDG_RUNTIME_DIR"
+            fi
+          fi
+        mode: '0755'
 
     - name: Ensure Sway configuration directory exists
       file:
