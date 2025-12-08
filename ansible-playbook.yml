@@ -13,17 +13,12 @@
     systemd_service_file: /etc/systemd/system/android-ssh.service
     
     # Kubernetes/Minikube settings
-    minikube_version: "1.32.0"
     kubectl_version: "1.29.0"
     
     # User settings
     # User settings
     setup_user: "{{ ansible_env.USER | default('root') }}"
     setup_user_home: "{{ ansible_env.HOME | default('/root') }}"
-
-    # ArgoCD settings
-    argocd_namespace: "argocd"
-    argocd_version: "2.9.0"
 
     # Architecture mapping
     arch_map:
@@ -221,67 +216,7 @@
     - name: Verify kubectl installation
       command: kubectl version --client
       register: kubectl_version_output
-      
-    # Minikube Installation
-    - name: Download Minikube
-      get_url:
-        url: "https://github.com/kubernetes/minikube/releases/download/v{{ minikube_version }}/minikube-linux-{{ arch_map[ansible_architecture] | default('amd64') }}"
-        dest: /usr/local/bin/minikube
-        mode: '0755'
-        force: yes
-      
-    - name: Verify Minikube installation
-      command: minikube version
-      register: minikube_version_output
-      
-    # Start Minikube
-    - name: Start Minikube cluster
-      command: minikube start --driver=podman --container-runtime=cri-o
-      register: minikube_start_output
-      changed_when: "'Starting' in minikube_start_output.stdout or 'Starting' in minikube_start_output.stderr"
-      
-    - name: Enable Minikube addons
-      command: "minikube addons enable {{ item }}"
-      loop:
-        - ingress
-        - dashboard
-        - metrics-server
-      register: minikube_addons_output
-      
-    # Install ArgoCD
-    - name: Create ArgoCD namespace
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Namespace
-          metadata:
-            name: "{{ argocd_namespace }}"
-      
-    - name: Install ArgoCD
-      kubernetes.core.k8s:
-        state: present
-        src: https://raw.githubusercontent.com/argoproj/argo-cd/v{{ argocd_version }}/manifests/install.yaml
-      
-    - name: Wait for ArgoCD pods to be ready
-      kubernetes.core.k8s_info:
-        kind: Pod
-        namespace: "{{ argocd_namespace }}"
-        label_selectors:
-          - app.kubernetes.io/name=argocd-server
-      register: argocd_pods
-      until: argocd_pods.resources | length > 0 and argocd_pods.resources[0].status.phase == 'Running'
-      retries: 30
-      delay: 10
-      
-    - name: Get ArgoCD admin password
-      command: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-      register: argocd_password
-      
-    - name: Get Minikube IP
-      command: minikube ip
-      register: minikube_ip_output
-      
+
     - name: Get device IP address
       set_fact:
         device_ip: "{{ ansible_default_ipv4.address }}"
@@ -322,8 +257,7 @@
           🚪 SSH Port: {{ ssh_port }}
           
           🐳 Podman: Installed
-          ☸️  Kubernetes: Minikube cluster running
-          🚀 ArgoCD: Installed and ready
+          ☸️  Kubectl: Installed (Client only)
           
           🚀 To start SSH server:
           - Interactive: {{ ssh_startup_script }}
@@ -337,14 +271,7 @@
           ⚙️  Config: {{ ssh_config_file }}
           
           ☸️  Kubernetes Access:
-          - Minikube IP: {{ minikube_ip_output.stdout }}
-          - kubectl: kubectl get pods --all-namespaces
-          - Dashboard: minikube dashboard
-          
-          🚀 ArgoCD Access:
-          - Admin Password: {{ argocd_password.stdout }}
-          - Port Forward: kubectl port-forward -n argocd svc/argocd-server 8080:443
-          - Web UI: https://localhost:8080 (admin / {{ argocd_password.stdout }})
+          - kubectl: kubectl get pods --all-namespaces (Requires external cluster config)
           
           ⚠️  IMPORTANT: Change the root password after first login!
           ========================================

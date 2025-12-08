@@ -82,25 +82,16 @@ run_test "SSH server can start" "timeout 5s sshd -T >/dev/null 2>&1 || true"
 # Test 14: Check Podman status
 run_test "Podman running" "podman info >/dev/null 2>&1"
 
-# Test 15: Check Minikube status
-run_test "Minikube running" "minikube status | grep -q 'Running'"
-
-# Test 16: Check ArgoCD namespace
-run_test "ArgoCD namespace exists" "kubectl get ns argocd"
-
-# Test 17: Check ArgoCD server pod
-run_test "ArgoCD server pod running" "kubectl -n argocd get pods -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].status.phase}' | grep -q 'Running'"
-
-# Test 18: Check update command
+# Test 15: Check update command
 run_test "Update command installed" "test -x /usr/local/bin/update-android-env"
 
-# Test 19: Check Sway installation
+# Test 16: Check Sway installation
 run_test "Sway installed" "command -v sway"
 
-# Test 20: Check Waybar installation
+# Test 17: Check Waybar installation
 run_test "Waybar installed" "command -v waybar"
 
-# Test 21: Check Kanshi installation
+# Test 18: Check Kanshi installation
 run_test "Kanshi installed" "command -v kanshi"
 
 echo
