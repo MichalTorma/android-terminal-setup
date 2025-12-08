@@ -24,6 +24,11 @@
     # ArgoCD settings
     argocd_namespace: "argocd"
     argocd_version: "2.9.0"
+
+    # Architecture mapping
+    arch_map:
+      x86_64: "amd64"
+      aarch64: "arm64"
     
   pre_tasks:
     - name: Display system information
@@ -207,7 +212,7 @@
     # Kubectl Installation
     - name: Download kubectl
       get_url:
-        url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/{{ arch_map[ansible_architecture] | default('amd64') }}/kubectl"
         dest: /usr/local/bin/kubectl
         mode: '0755'
       
@@ -218,7 +223,7 @@
     # Minikube Installation
     - name: Download Minikube
       get_url:
-        url: "https://github.com/kubernetes/minikube/releases/download/v{{ minikube_version }}/minikube-linux-amd64"
+        url: "https://github.com/kubernetes/minikube/releases/download/v{{ minikube_version }}/minikube-linux-{{ arch_map[ansible_architecture] | default('amd64') }}"
         dest: /usr/local/bin/minikube
         mode: '0755'
       
