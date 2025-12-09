@@ -225,6 +225,7 @@
           # Sway/Wayland Compatibility for Android Containers
           export WLR_RENDERER=pixman          # Force software rendering (fixes black screen/gl errors)
           export WLR_NO_HARDWARE_CURSORS=1    # Fix invisible cursor
+          export WLR_LIBINPUT_NO_DEVICES=1    # Fix mouse not working (relies on X11/Wayland backend input)
           export XDG_CURRENT_DESKTOP=sway     # Help apps know where they are
           export XDG_SESSION_TYPE=wayland
           export MOZ_ENABLE_WAYLAND=1
